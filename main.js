@@ -1,56 +1,153 @@
-import * as THREE from 'three';
+import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import * as dat from 'lil-gui'
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 500 );
-// const camera = new THREE.OrthographicCamera(1000,-1000 ,1000, -1000 , 1, 1000);
-const light = new THREE.DirectionalLight(0x0000f0, 10);
-light.position.set(0,0,30);
-// light.target.mesh(cube);
-scene.add(light);
+/**
+ * Debug
+ */
+const gui = new dat.GUI()
 
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
+/**
+ * Base
+ */
+// Canvas
+const canvas = document.querySelector('canvas.webgl')
 
-const geometry = new THREE.BoxGeometry( 2, 2, 2 );
-const material = new THREE.MeshBasicMaterial( { color: 0xfff000  } );
-const material1 = new THREE.MeshBasicMaterial( { color: 0x000fff } );
-const cube = new THREE.Mesh( geometry, material );
+// Scene
+const scene = new THREE.Scene()
 
-const cube2 = new THREE.Mesh(geometry, material1);
-cube.position.x = -2.5;
-cube2.position.x +=2.5;
-scene.add(cube);
+/**
+ * Textures
+ */
+/* const textureLoader = new THREE.TextureLoader() */
+const cubeTextureLoader = new THREE.CubeTextureLoader()
 
-scene.add(cube2);
+const environmentMapTexture = cubeTextureLoader.load([
+    '/textures/environmentMaps/0/px.png',
+    '/textures/environmentMaps/0/nx.png',
+    '/textures/environmentMaps/0/py.png',
+    '/textures/environmentMaps/0/ny.png',
+    '/textures/environmentMaps/0/pz.png',
+    '/textures/environmentMaps/0/nz.png'
+])
 
-camera.position.z = 25;
-camera.position.x = -5;
-camera.position.y = 5;
-camera.updateProjectionMatrix;
-function animate() {
-	requestAnimationFrame( animate );
+/**
+ * Test sphere
+ */
+const sphere = new THREE.Mesh(
+    new THREE.SphereGeometry(0.5, 32, 32),
+    new THREE.MeshStandardMaterial({
+        metalness: 0.3,
+        roughness: 0.4,
+        envMap: environmentMapTexture,
+        envMapIntensity: 0.5
+    })
+)
+sphere.castShadow = true
+sphere.position.y = 0.5
+scene.add(sphere)
 
-	//cube.rotation.x += 0.01;
-	//cube.rotation.y += 0.01;
-	cube.translateX(0.01);
-	
-	cube2.translateX(-0.01);
-	//cube2.rotation.x += 0.01;
-	//cube2.rotation.y += 0.01;
-	renderer.render( scene, camera );
+/**
+ * Floor
+ */
+const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(10, 10),
+    new THREE.MeshStandardMaterial({
+        color: '#777777',
+        metalness: 0.3,
+        roughness: 0.4,
+        envMap: environmentMapTexture,
+        envMapIntensity: 0.5
+    })
+)
+floor.receiveShadow = true
+floor.rotation.x = - Math.PI * 0.5
+scene.add(floor)
+
+/* 
+Test cube
+*/
+
+/**
+ * Lights
+ */
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.7)
+scene.add(ambientLight)
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.2)
+directionalLight.castShadow = true
+directionalLight.shadow.mapSize.set(1024, 1024)
+directionalLight.shadow.camera.far = 15
+directionalLight.shadow.camera.left = - 7
+directionalLight.shadow.camera.top = 7
+directionalLight.shadow.camera.right = 7
+directionalLight.shadow.camera.bottom = - 7
+directionalLight.position.set(5, 5, 5)
+scene.add(directionalLight)
+
+/**
+ * Sizes
+ */
+const sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight
 }
 
-import WebGL from 'three/addons/capabilities/WebGL.js';
+window.addEventListener('resize', () =>
+{
+    // Update sizes
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
 
-if ( WebGL.isWebGLAvailable() ) {
+    // Update camera
+    camera.aspect = sizes.width / sizes.height
+    camera.updateProjectionMatrix()
 
-	// Initiate function or other initializations here
-	animate();
+    // Update renderer
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+})
 
-} else {
+/**
+ * Camera
+ */
+// Base camera
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
+camera.position.set(- 3, 3, 3)
+scene.add(camera)
 
-	const warning = WebGL.getWebGLErrorMessage();
-	document.getElementById( 'container' ).appendChild( warning );
+// Controls
+const controls = new OrbitControls(camera, canvas)
+controls.enableDamping = true
 
+/**
+ * Renderer
+ */
+const renderer = new THREE.WebGLRenderer({
+    canvas: canvas
+})
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
+renderer.setSize(sizes.width, sizes.height)
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+/**
+ * Animate
+ */
+const clock = new THREE.Clock()
+
+const tick = () =>
+{
+    const elapsedTime = clock.getElapsedTime()
+
+    // Update controls
+    controls.update()
+
+    // Render
+    renderer.render(scene, camera)
+
+    // Call tick again on the next frame
+    window.requestAnimationFrame(tick)
 }
+
+tick()
