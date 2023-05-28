@@ -7,8 +7,7 @@ A simple Polygon Collision visualiser build using ThreeJS
 
 
     ```
-    npm install --save three
-    npm install --save-dev vite
+    npm install
     npx vite
     ```
 
