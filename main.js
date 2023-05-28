@@ -18,8 +18,9 @@ function init() {
 
   const vertices = [0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0];
   // const vertices1 = [0, -1.2, 0, 1, -1.2, 0, 1, -0.2, 0, 0, -0.2, 0];
+  // const vertices1 = [0.8, -0.8, 0, 1.8, -0.8, 0, 1.8, 0.2, 0, 0.8, 0.2, 0];
+  // const vertices1 = [1, -1, 0, 1, -1, 0, 2, 0, 0, 1, 0, 0];
   const vertices1 = [0.8, -0.8, 0, 1.8, -0.8, 0, 1.8, -0.2, 0, 0.8, -0.2, 0];
-  //const vertices1 = [1, -1, 0, 1, -1, 0, 2, 0, 0, 1, 0, 0];
 
   const material = new THREE.MeshBasicMaterial({ color: 0xfff000 });
   const material1 = new THREE.MeshBasicMaterial({ color: 0x000fff });
@@ -109,7 +110,7 @@ function gjk(shape1, shape2) {
   while (1) {
     let A = support(shape1, shape2, d);
     console.log(A);
-    if (A.dot(d) > 0) {
+    if (A.dot(d) < 0) {
       return false;
     }
     simplex.push(A);
@@ -141,11 +142,13 @@ function find_centre(shape) {
   return centre;
 }
 
-function support(shape1, shape2, direction) {
-  let origin = new THREE.Vector3(0, 0, 0);
-  let farthestPointShape1 = getFarthestPoint(shape1, direction);
-  let farthestPointShape2 = getFarthestPoint(shape2, subvec(origin, direction));
-  return subvec(farthestPointShape1, farthestPointShape2);
+function support(shape1, shape2, d) {
+  var dir = d.clone().normalize();
+
+  var p1 = getFarthestPoint(shape1, dir);
+  var p2 = getFarthestPoint(shape2, dir.negate());
+
+  return p1.clone().sub(p2);
 }
 
 function handleSimplex(obj) {
@@ -177,8 +180,8 @@ function triangularsimplex(obj) {
   let ab = subvec(b, a);
   let ac = subvec(c, a);
   let ao = subvec(origin, a);
-  let abperp = vectortripleprod(ac, ab, ab);
-  let acperp = vectortripleprod(ab, ac, ac);
+  let abperp = vectortripleprod(ab, ac, ab);
+  let acperp = vectortripleprod(ac, ab, ac);
 
   if (abperp.dot(ao) > 0) {
     //origin is in region ab
