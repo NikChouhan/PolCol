@@ -137,13 +137,23 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  * Animate
  */
 const clock = new THREE.Clock()
+const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+const material2 = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+const cube = new THREE.Mesh( geometry, material );
 
+const cube2 = new THREE.Mesh( geometry, material2 );
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
 
     // Update controls
     controls.update()
+
+    cube.translateX(0.001)
+    cube2.translateX(-0.001)
+
+    console.log(gjk(cube, cube2))
 
     // Render
     renderer.render(scene, camera)
@@ -155,25 +165,25 @@ const tick = () =>
 tick()
 
 
-const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+/* const geometry = new THREE.BoxGeometry( 1, 1, 1 );
 const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 const cube = new THREE.Mesh( geometry, material );
 
-const cube2 = new THREE.Mesh( geometry, material );
+const cube2 = new THREE.Mesh( geometry, material ); */
 
 function gjk(shape1, shape2) {
     let centre1 = find_centre(shape1);
     let centre2 = find_centre(shape2);
     let d = subvec(centre1, centre2);
-    console.log(centre1, centre2);
+   /*  console.log(centre1, centre2); */
     let simplex = [support(shape1, shape2, d)];
-    console.log(simplex[0]);
+    /* console.log(simplex[0]); */
     let origin = new THREE.Vector3(0, 0, 0);
     d = subvec(origin, simplex[0]);
-    console.log(d);
+    /* console.log(d); */
     while (1) {
       let A = support(shape1, shape2, d);
-      console.log(A);
+      /* console.log(A); */
       if (A.dot(d) < 0) {
         return false;
       }
@@ -241,7 +251,7 @@ function gjk(shape1, shape2) {
         maxProjection = projection;
       }
     }
-    console.log(shape, farthestPoint, direction);
+    /* console.log(shape, farthestPoint, direction); */
     return farthestPoint;
   }
   
@@ -313,7 +323,7 @@ function gjk(shape1, shape2) {
     return vec1.normalize();
   }
 
-  cube.position.y = 0.5;
+ cube.position.y = 0.5;
 cube2.position.x = 2;
 cube2.position.y = 0.5;
 scene.add(cube);
@@ -322,11 +332,21 @@ scene.add(cube2);
 let pos = geometry.attributes.position;
 let vertex = new THREE.Vector3( pos.getX(0), pos.getY(0), pos.getZ(0) );
 
+let vertex2 = new THREE.Vector3( pos.getX(0), pos.getY(0), pos.getZ(0) );
+
+/* cube.localToWorld(vertex); */
+
 cube.localToWorld(vertex);
+
+cube2.localToWorld(vertex2);
 console.log(vertex);
+
+console.log(vertex2)
 
 var verts = geometry.attributes.position;
 
+var verts2 = geometry.attributes.position;
+
 console.log(verts)
 
-gjk(cube, cube2)
+
