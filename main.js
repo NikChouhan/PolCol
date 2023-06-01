@@ -134,26 +134,86 @@ renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 /**
- * Animate
+ * Mesh initialisation
  */
-const clock = new THREE.Clock()
-const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+
+/**
+ * Cube
+ */
+
+/* const geometry = new THREE.BoxGeometry( 1, 1, 1 );
 const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 const material2 = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
 const cube = new THREE.Mesh( geometry, material );
-
 const cube2 = new THREE.Mesh( geometry, material2 );
+
+cube.position.y = 0.5;
+cube2.position.x = 2;
+cube2.position.y = 0.8;
+cube2.position.z = -0.5
+
+scene.add(cube);
+scene.add(cube2); */
+
+/**
+ * Sphere
+ */
+const geometry = new THREE.SphereGeometry( 1, 32, 16 ); 
+const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } ); 
+const sphere = new THREE.Mesh( geometry, material ); 
+const geometry1 = new THREE.SphereGeometry( 1, 32, 16 ); 
+const material1 = new THREE.MeshBasicMaterial( { color: 0xffff00 } ); 
+const sphere1 = new THREE.Mesh( geometry1, material1 ); 
+
+sphere.position.y = 1
+sphere1.position.y = 1
+
+sphere1.position.z =1
+
+scene.add( sphere );
+scene.add( sphere1 );
+
+const clock = new THREE.Clock()
+
+
+/* let pos = geometry.attributes.position;
+let vertex = new THREE.Vector3( pos.getX(0), pos.getY(0), pos.getZ(0) );
+let vertex2 = new THREE.Vector3( pos.getX(0), pos.getY(0), pos.getZ(0) );
+cube.localToWorld(vertex);
+cube2.localToWorld(vertex2);  
+console.log(vertex);
+console.log(vertex2);
+
+  //The code is mostly redundant
+
+*/
+
+let vel = 0.005;
+
+/**
+ * Animate
+ */
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
 
+    let delta = clock.getDelta();
+
+    /* let numb = delta*elapsedTime */
+
     // Update controls
-    controls.update()
+    controls.update(delta)
+    /* console.log(delta) */
 
-    cube.translateX(0.001)
-    cube2.translateX(-0.001)
+    /* cube.translateX(vel)
+    cube2.translateX(-vel) */
 
-    console.log(gjk(cube, cube2))
+    sphere.translateX(vel)
+    sphere1.translateX(-vel)
+
+
+    /* console.log(gjk(cube, cube2)) */
+    console.log(gjk(sphere, sphere1))
 
     // Render
     renderer.render(scene, camera)
@@ -165,11 +225,9 @@ const tick = () =>
 tick()
 
 
-/* const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-const cube = new THREE.Mesh( geometry, material );
-
-const cube2 = new THREE.Mesh( geometry, material ); */
+/* 
+ * GJK algorithm
+*/
 
 function gjk(shape1, shape2) {
     let centre1 = find_centre(shape1);
@@ -323,30 +381,10 @@ function gjk(shape1, shape2) {
     return vec1.normalize();
   }
 
- cube.position.y = 0.5;
-cube2.position.x = 2;
-cube2.position.y = 0.5;
-scene.add(cube);
-scene.add(cube2);
-
-let pos = geometry.attributes.position;
-let vertex = new THREE.Vector3( pos.getX(0), pos.getY(0), pos.getZ(0) );
-
-let vertex2 = new THREE.Vector3( pos.getX(0), pos.getY(0), pos.getZ(0) );
-
-/* cube.localToWorld(vertex); */
-
-cube.localToWorld(vertex);
-
-cube2.localToWorld(vertex2);
-console.log(vertex);
-
-console.log(vertex2)
-
-var verts = geometry.attributes.position;
+/* var verts = geometry.attributes.position;
 
 var verts2 = geometry.attributes.position;
 
 console.log(verts)
-
+ */
 
