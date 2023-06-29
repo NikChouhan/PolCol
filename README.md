@@ -8,6 +8,6 @@ A simple Polygon Collision visualiser build using ThreeJS
 
     ```
     npm install
-    npx vite
+    npm run dev
     ```
 
